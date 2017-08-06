@@ -58,8 +58,8 @@ func handleClient(conn net.Conn, done chan interface{}, m *sync.Mutex) {
 	}
 }
 
-func Start(done chan interface{}, wg *sync.WaitGroup) {
-	listener, err := net.Listen("tcp", ":8888")
+func Start(port string, done chan interface{}, wg *sync.WaitGroup) {
+	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("Fatal: %v", err)
 	}
@@ -82,12 +82,14 @@ func Start(done chan interface{}, wg *sync.WaitGroup) {
 }
 
 func main() {
+	var port string
+	flag.StringVar(&port, "p", "8888", "port number")
+	flag.StringVar(&port, "port", "8888", "port number")
+	flag.Parse()
+
 	wg := &sync.WaitGroup{}
 	done := make(chan interface{})
-	go Start(done, wg)
-
-	flag.Usage = func() {}
-	flag.Parse()
+	go Start(port, done, wg)
 
 	cmd := flag.Args()
 	c := exec.Command(cmd[0], cmd[1:]...)
